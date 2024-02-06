@@ -6,9 +6,7 @@ const About = () => {
 
     const a = useContext(taskContext);
     
-    useEffect(()=>{
-        a.update();
-    }, []);
+    
     return (
     <div>
       My name is {a.state.name}
