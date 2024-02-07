@@ -9,7 +9,7 @@ const About = () => {
     
     return (
     <div>
-      My name is {a.state.name}
+      My name is saad
     </div>
   )
 }
