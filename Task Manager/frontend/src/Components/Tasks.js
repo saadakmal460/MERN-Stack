@@ -1,11 +1,17 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import tasksContext from "../Context/Task/TaskContext.js";
 import TaskCards from "./TaskCards.js";
 import AddTask from "./AddTask";
 
 const Tasks = () => {
   const Context = useContext(tasksContext);
-  const {tasks,} = Context;
+  const {tasks, GetAllTasks} = Context;
+
+  useEffect(()=>{
+    GetAllTasks();
+  },  []);
+
+  
   return (
     <>
       <AddTask /> 
