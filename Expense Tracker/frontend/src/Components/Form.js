@@ -1,4 +1,5 @@
 import React from 'react'
+import List from './List.js'
 import {useForm} from 'react-hook-form'
 
 const Form = () => {
@@ -41,11 +42,14 @@ const Form = () => {
             <div className='submit-btn'>
                 <button className='border py-2 text-white bg-indigo-500 w-full'>Make Transaction</button>
             </div>
+            
 
 
         </div>
 
       </form>
+
+      <List></List>
     </div>
   )
 }
