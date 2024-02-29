@@ -2,7 +2,7 @@ import express from "express";
 import { categoriesModel, transactionModel } from "../Models/Model.js";
 
 
-//Getting all categories
+// POST:Getting all categories
 export const GetCategories = async (Req, Res) => {
   try {
     const categories = await categoriesModel.find({});
@@ -12,7 +12,7 @@ export const GetCategories = async (Req, Res) => {
   }
 };
 
-//Creating a category
+//GET:Creating a category
 export const CreateCategories = async (Req, Res) => {
   try {
     const category = await categoriesModel.create(Req.body);
@@ -21,3 +21,67 @@ export const CreateCategories = async (Req, Res) => {
     Res.status(404).json(error);
   }
 };
+
+//POST:Creating Transaction
+export const CreateTransactions = async (Req , Res)=>{
+  try {
+    if(!Req.body)
+    {
+      Res.status(400).json("No data was found"); 
+    }
+    const transaction = await transactionModel.create(Req.body);
+    Res.status(201).json({ transaction });
+  } catch (error) {
+    Res.status(404).json(error);
+  }
+}
+
+//GET:Getting Transactions
+export const GetTransactions = async (Req, Res) => {
+  try {
+    const transaction = await transactionModel.find({});
+    Res.status(200).json({ transaction });
+  } catch (error) {
+    Res.status(404).json(error);
+  }
+};
+
+
+//DELETE:Deleting Transaction
+export const DeleteTransaction = async (Req, Res) => {
+  try {
+    //Getting a single task and deleting
+    const { id: transactionId } = Req.params;
+    const transaction = await transactionModel.findOneAndDelete({ _id: transactionId });
+
+    if (!transaction) {
+      return Res.status(404).json({ msg: `No Transaction with id was found` });
+    }
+
+    Res.status(200).json({ transaction });
+  } catch (error) {
+    Res.status(500).json({ msg: error });
+  }
+};
+
+
+export const GetLabels = async (Req , Res) =>{
+  transactionModel.aggregate([
+    {
+      $lookup:{
+        from:"categories",
+        localField:'type',
+        foreignField:"type",
+        as:"categories_info"
+      }
+    },
+
+    {
+      $unwind:"$categories_info"
+    }
+]).then(result=>{
+  Res.json({result});
+}).catch(err =>{
+  Res.status(400).json(err)
+})
+}
