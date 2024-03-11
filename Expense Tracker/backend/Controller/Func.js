@@ -65,23 +65,34 @@ export const DeleteTransaction = async (Req, Res) => {
 };
 
 
-export const GetLabels = async (Req , Res) =>{
+export const GetLabels = async (Req, Res) => {
   transactionModel.aggregate([
     {
-      $lookup:{
-        from:"categories",
-        localField:'type',
-        foreignField:"type",
-        as:"categories_info"
+      $lookup: {
+        from: "categories",
+        localField: 'type',
+        foreignField: "type",
+        as: "categories_info"
       }
     },
-
     {
-      $unwind:"$categories_info"
+      $unwind: "$categories_info"
     }
-]).then(result=>{
-  Res.json({result});
-}).catch(err =>{
-  Res.status(400).json(err)
-})
+  ]).then(result => {
+    if (result.length > 0) {
+      const data = result[0]; // Take the first object from the array
+      const responseObject = {
+        _id: data._id,
+        name: data.name,
+        type: data.type,
+        amount: data.amount,
+        color: data.categories_info['color']
+      };
+      Res.json(responseObject); // Send the single object as response
+    } else {
+      Res.status(404).json({ message: "No data found" });
+    }
+  }).catch(err => {
+    Res.status(400).json(err);
+  });
 }
