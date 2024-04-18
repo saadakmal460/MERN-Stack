@@ -1,8 +1,7 @@
 import express from "express";
 import { categoriesModel, transactionModel } from "../Models/Model.js";
 
-
-// POST:Getting all categories
+// GET:Getting all categories
 export const GetCategories = async (Req, Res) => {
   try {
     const categories = await categoriesModel.find({});
@@ -12,7 +11,7 @@ export const GetCategories = async (Req, Res) => {
   }
 };
 
-//GET:Creating a category
+//POST:Creating a category
 export const CreateCategories = async (Req, Res) => {
   try {
     const category = await categoriesModel.create(Req.body);
@@ -23,18 +22,17 @@ export const CreateCategories = async (Req, Res) => {
 };
 
 //POST:Creating Transaction
-export const CreateTransactions = async (Req , Res)=>{
+export const CreateTransactions = async (Req, Res) => {
   try {
-    if(!Req.body)
-    {
-      Res.status(400).json("No data was found"); 
+    if (!Req.body) {
+      Res.status(400).json("No data was found");
     }
     const transaction = await transactionModel.create(Req.body);
     Res.status(201).json({ transaction });
   } catch (error) {
     Res.status(404).json(error);
   }
-}
+};
 
 //GET:Getting Transactions
 export const GetTransactions = async (Req, Res) => {
@@ -46,13 +44,14 @@ export const GetTransactions = async (Req, Res) => {
   }
 };
 
-
 //DELETE:Deleting Transaction
 export const DeleteTransaction = async (Req, Res) => {
   try {
     //Getting a single task and deleting
     const { id: transactionId } = Req.params;
-    const transaction = await transactionModel.findOneAndDelete({ _id: transactionId });
+    const transaction = await transactionModel.findOneAndDelete({
+      _id: transactionId,
+    });
 
     if (!transaction) {
       return Res.status(404).json({ msg: `No Transaction with id was found` });
@@ -64,35 +63,37 @@ export const DeleteTransaction = async (Req, Res) => {
   }
 };
 
-
 export const GetLabels = async (Req, Res) => {
-  transactionModel.aggregate([
-    {
-      $lookup: {
-        from: "categories",
-        localField: 'type',
-        foreignField: "type",
-        as: "categories_info"
-      }
-    },
-    {
-      $unwind: "$categories_info"
-    }
-  ]).then(result => {
-    if (result.length > 0) {
-      const data = result[0]; // Take the first object from the array
-      const responseObject = {
-        _id: data._id,
-        name: data.name,
-        type: data.type,
-        amount: data.amount,
-        color: data.categories_info['color']
-      };
-      Res.json(responseObject); // Send the single object as response
-    } else {
-      Res.status(404).json({ message: "No data found" });
-    }
-  }).catch(err => {
-    Res.status(400).json(err);
-  });
-}
+  try {
+    const result = await transactionModel.aggregate([
+      {
+        $lookup: {
+          from: "categories",
+          localField: "type",
+          foreignField: "type",
+          as: "categories_info",
+        },
+      },
+      {
+        $unwind: {
+          path: "$categories_info",
+          preserveNullAndEmptyArrays: true, // Preserve documents that don't match
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          type: 1,
+          amount: 1,
+          color: { $ifNull: ["$categories_info.color", ""] }, // Use a default color if no category is found
+        },
+      },
+    ]);
+    Res.json(result);
+  } catch (error) {
+    console.error("Error combining data:", error);
+    Res.status(400).json("Lookup Collection Error");
+  }
+};
+
