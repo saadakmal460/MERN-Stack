@@ -1,29 +1,31 @@
 import React from "react";
 import { default as api } from "../Store/apiSlice";
+import {getLabels} from "../Helper/helper"
+import Spinner from "./Spinner";
 
 const Labels = () => {
   const { data, isFetching, isSuccess, isError } = api.useGetLabelsQuery();
-  console.log(data);
+  
   let transaction;
  
   
 
   if (isFetching) 
   {
-    transaction = <div>Fetching</div>;
+    transaction = <Spinner/>;
   } 
   else if (isSuccess) 
   {
     
-   
-    transaction = data.map((v, i) => <LabelComponents key={i} data={v} />);
+  
+    transaction = getLabels(data).map((v, i) => <LabelComponents key={i} data={v} />);
     
     
   } else if (isError) {
     transaction = <div>Error</div>;
   }
 
-  console.log(data);
+
 
   return <>{transaction}</>;
 };
@@ -42,7 +44,7 @@ const LabelComponents = ({ data }) => {
         <h3>{data.type ?? ""}</h3>
       </div>
 
-      <div className="font-bold">{data.percent ?? 0}%</div>
+      <div className="font-bold">{Math.round(data.percent) ?? 0}%</div>
     </div>
   );
 };

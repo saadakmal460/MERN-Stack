@@ -13,13 +13,13 @@ const List = () => {
 
   const handleClick = (e) => {
     const recordId = e.target.dataset.id;
-    console.log("Transaction ID:", e.target.dataset.id);
+    
     try {
       deleteTransaction(recordId);
-      console.log("Transaction deletion initiated");
+      
     } catch (error) {
-      console.error("Error initiating transaction deletion:", error);
-      // Handle the error as needed
+      
+      
     }
   };
   
